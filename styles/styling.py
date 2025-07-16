@@ -49,8 +49,8 @@ def load_avatar_css():
 def set_page_config():
     """Set page configuration"""
     st.set_page_config(
-        page_title="Simple Chat",
-        page_icon="💬",
+        page_title="Stufit Report Analyzer",
+        page_icon="media/stufit_logo.png",
         layout="wide",
         initial_sidebar_state="collapsed"
     )
