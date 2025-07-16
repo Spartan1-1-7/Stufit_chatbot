@@ -1,0 +1,122 @@
+/* Chat message styling */
+.stChatMessage {
+    border-radius: 15px;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+/* Title styling */
+.main-title {
+    text-align: center;
+    color: #FF6B6B;
+    font-size: 3em;
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Chat input styling */
+.stChatInput > div > div > input {
+    border-radius: 20px;
+    border: 2px solid #FF6B6B;
+    background-color: #262730;
+    color: #FAFAFA;
+}
+
+/* Hide Streamlit menu and footer */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Background gradient */
+.stApp {
+    background: linear-gradient(135deg, #0E1117 0%, #1E2139 100%);
+}
+
+/* Sidebar styling */
+.css-1d391kg {
+    background: linear-gradient(135deg, #262730 0%, #1E2139 100%);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .main-title {
+        font-size: 2em !important;
+        margin-bottom: 20px !important;
+    }
+    .stChatMessage {
+        padding: 8px !important;
+        margin: 3px 0 !important;
+    }
+    .stChatInput > div > div > input {
+        font-size: 16px !important;
+        padding: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-title {
+        font-size: 1.5em !important;
+        margin-bottom: 15px !important;
+    }
+    .stChatMessage {
+        padding: 6px !important;
+        margin: 2px 0 !important;
+        font-size: 14px !important;
+    }
+    .stChatInput > div > div > input {
+        font-size: 14px !important;
+        padding: 10px !important;
+    }
+}
+
+/* Additional responsive features */
+.stChatMessage {
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+.stChatInput > div > div > input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.stChatInput {
+    padding: 10px;
+    max-width: 100%;
+}
+
+.stApp {
+    min-height: 100vh;
+    padding: 0 10px;
+}
+
+/* Responsive container */
+.main-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px 10px;
+}
+
+@media (min-width: 1200px) {
+    .main-container {
+        max-width: 1200px;
+        padding: 20px;
+    }
+}
+
+@media (min-width: 768px) {
+    .stApp {
+        padding: 0 20px;
+    }
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+    .stApp > div {
+        padding: 0 5px;
+    }
+    
+    .stChatInput > div > div {
+        margin: 0;
+    }
+}
