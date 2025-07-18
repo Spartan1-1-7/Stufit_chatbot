@@ -7,4 +7,5 @@ dependencies:
   - streamlit
   - python-dotenv
   - faiss-cpu
+  - langchain-community
 prefix: C:\Users\megha\anaconda3\envs\stufit_chatbot
