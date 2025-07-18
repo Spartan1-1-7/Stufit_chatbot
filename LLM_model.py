@@ -13,7 +13,7 @@ print(torch.__version__)
 load_dotenv()
 
 # Fetch the token
-token = os.getenv("HUGGINGFACE_mixtral_TOKEN")
+token = os.getenv("HUGGINGFACE_mixtrail_read_TOKEN")
 
 # Load FAISS index and metadata
 faiss_index = faiss.read_index("db_faiss/faiss_index_chunk_text.faiss")  # your FAISS file
