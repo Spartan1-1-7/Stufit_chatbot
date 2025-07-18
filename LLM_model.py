@@ -28,8 +28,9 @@ embedding_model = SentenceTransformer("all-MiniLM-L6-v2")  # or the one you used
 
 # Load Mixtral model & tokenizer
 model_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype="auto")
+tokenizer = AutoTokenizer.from_pretrained(model_id, token=token)
+model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype="auto", token=token)
+
 
 # Create text generation pipeline
 text_generator = pipeline("text-generation", model=model, tokenizer=tokenizer)
