@@ -2,6 +2,7 @@ import streamlit as st
 import random
 import time
 from styles.styling import load_css, set_page_config, load_avatar_css
+from LLM_model import generate_response
 
 # Configure page and load styles
 set_page_config()
@@ -9,14 +10,8 @@ load_css()
 load_avatar_css()
 
 # Streamed response emulator
-def response_generator():
-    response = random.choice(
-        [
-            "Hello there! How can I assist you today?",
-            "Hi, human! Is there anything I can help you with?",
-            "Do you need help?",
-        ]
-    )
+def response_generator(prompt):
+    response = generate_response(prompt)
     for word in response.split():
         yield word + " "
         time.sleep(0.1)
@@ -47,7 +42,7 @@ if prompt := st.chat_input("What is up?"):
 
     # Display assistant response in chat message container
     with st.chat_message("assistant", avatar="media/stufit_logo.png"):
-        response = st.write_stream(response_generator())
+        response = st.write_stream(response_generator(prompt))
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
 
