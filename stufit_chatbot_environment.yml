@@ -3,5 +3,8 @@ channels:
   - defaults
 dependencies:
   - python=3.12
+  - huggingface_hub
   - streamlit
-prefix: /home/arindam-shukla/anaconda3/envs/stufit_chatbot
+  - python-dotenv
+  - faiss-cpu
+prefix: C:\Users\megha\anaconda3\envs\stufit_chatbot

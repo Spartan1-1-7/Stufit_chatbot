@@ -1,14 +1,32 @@
+import os
+from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
+import faiss
+import pickle  # or use your method for storing FAISS index
+import numpy as np
+from sentence_transformers import SentenceTransformer
 
-# 🔑 Add your Hugging Face token here
-token = "your_huggingface_token_here"
+# Load the .env file
+load_dotenv()
 
-# Choose model
+# Fetch the token
+token = os.getenv("HUGGINGFACE_TOKEN")
+
+# Load FAISS index and metadata
+faiss_index = faiss.read_index("my_faiss_index.index")  # your FAISS file
+with open("docstore.pkl", "rb") as f:
+    documents = pickle.load(f)  # your list of text chunks corresponding to vectors
+
+# Load the embedding model (same one used during indexing)
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")  # or the one you used
+
+
+# Initialize client
 client = InferenceClient(
     model="mistralai/Mixtral-8x7B-Instruct-v0.1",
     token=token
 )
-
+# Prompt builder
 def build_prompt(user_query, retrieved_chunks):
     joined_chunks = "\n\n".join(retrieved_chunks)
     prompt = f"""
@@ -20,10 +38,20 @@ Medical Report:
 Relevant Medical Knowledge:
 {joined_chunks}
 
-Answer:"""
+Answer (Only use the above relevant knowledge. If not found, reply "I don't know."):
+"""
     return prompt
 
-def generate_response(user_query, retrieved_chunks):
+# Vector search + generation
+def generate_response(user_query, top_k=3):
+    query_embedding = embedding_model.encode([user_query])
+    distances, indices = faiss_index.search(np.array(query_embedding), top_k)
+    
+    retrieved_chunks = [documents[i] for i in indices[0] if i != -1]
+    
+    if not retrieved_chunks:
+        return "I don't know."
+
     prompt = build_prompt(user_query, retrieved_chunks)
     response = client.text_generation(prompt=prompt, max_new_tokens=300)
     return response
