@@ -13,8 +13,8 @@ load_dotenv()
 token = os.getenv("HUGGINGFACE_TOKEN")
 
 # Load FAISS index and metadata
-faiss_index = faiss.read_index("db_faiss/index.faiss")  # your FAISS file
-with open("db_faiss/index.pkl", "rb") as f:
+faiss_index = faiss.read_index("db_faiss/faiss_index_chunk_text.faiss")  # your FAISS file
+with open("db_faiss/chunk_texts.pkl", "rb") as f:
     documents = pickle.load(f)  # your list of text chunks corresponding to vectors
 # print("FAISS index dimension:", faiss_index.d)
 
