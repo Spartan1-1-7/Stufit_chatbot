@@ -1,12 +1,14 @@
 name: stufit_chatbot
 channels:
-  - conda-forge 
+  - conda-forge
   - defaults
 dependencies:
   - python=3.12
-  - huggingface_hub
   - streamlit
+  - huggingface_hub
   - python-dotenv
-  - faiss-cpu
   - langchain-community
-prefix: C:\Users\megha\anaconda3\envs\stufit_chatbot
+  - faiss-cpu
+  - sentence-transformers
+  - ipykernel
+prefix: /home/arindam-shukla/anaconda3/envs/stufit_chatbot
