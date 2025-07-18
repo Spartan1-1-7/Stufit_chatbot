@@ -1,11 +1,14 @@
 import os
+import torch
 from dotenv import load_dotenv
-from huggingface_hub import InferenceClient
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import faiss
 import pickle  # or use your method for storing FAISS index
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
+
+print(torch.__version__)
 # Load the .env file
 load_dotenv()
 
@@ -23,15 +26,19 @@ with open("db_faiss/chunk_texts.pkl", "rb") as f:
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")  # or the one you used
 
 
-# Initialize client
-client = InferenceClient(
-    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
-    token=token
-)
+# Load Mixtral model & tokenizer
+model_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", torch_dtype="auto")
+
+# Create text generation pipeline
+text_generator = pipeline("text-generation", model=model, tokenizer=tokenizer)
+
+
 # Prompt builder
 def build_prompt(user_query, retrieved_chunks):
     joined_chunks = "\n\n".join(retrieved_chunks)
-    prompt = f"""
+    instruction = f"""
 You are a helpful medical assistant. Analyze the following medical report and retrieved expert medical knowledge. Identify any possible health issues or important insights.
 
 Medical Report:
@@ -42,7 +49,8 @@ Relevant Medical Knowledge:
 
 Answer (Only use the above relevant knowledge. If not found, reply "I don't know."):
 """
-    return prompt
+    return f"<s>[INST] {instruction.strip()} [/INST]"
+
 
 # Vector search + generation
 def generate_response(user_query, top_k=3):
@@ -61,8 +69,9 @@ def generate_response(user_query, top_k=3):
         return "I don't know."
 
     prompt = build_prompt(user_query, retrieved_chunks)
-    response = client.text_generation(prompt=prompt, max_new_tokens=300)
-    return response
+    response = text_generator(prompt, max_new_tokens=300, do_sample=True, temperature=0.7)
+    return response[0]['generated_text']
+
 
 if __name__ == "__main__":
     query = "What is a heart-attack?"
