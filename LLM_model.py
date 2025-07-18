@@ -10,7 +10,7 @@ from sentence_transformers import SentenceTransformer
 load_dotenv()
 
 # Fetch the token
-token = os.getenv("HUGGINGFACE_zephyr_TOKEN")
+token = os.getenv("HUGGINGFACE_mixtral_TOKEN")
 
 # Load FAISS index and metadata
 faiss_index = faiss.read_index("db_faiss/faiss_index_chunk_text.faiss")  # your FAISS file
@@ -25,7 +25,7 @@ embedding_model = SentenceTransformer("all-MiniLM-L6-v2")  # or the one you used
 
 # Initialize client
 client = InferenceClient(
-    model="HuggingFaceH4/zephyr-7b-beta",
+    model="mistralai/Mixtral-8x7B-Instruct-v0.1",
     token=token
 )
 # Prompt builder
