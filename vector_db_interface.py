@@ -17,7 +17,7 @@ apply_responsive_config()
 load_responsive_css()
 
 # Create responsive header
-create_responsive_header("📚 Vector Database Ingestion")
+create_responsive_header("Vector Database Ingestion")
 
 # Main upload section with responsive container
 # create_upload_container()
@@ -42,5 +42,5 @@ if uploaded_files:
     if create_responsive_button("🚀 Process Files"):
         with st.spinner("Processing files..."):
             # Add your file processing logic here
-            st.success(f"✅ Successfully processed {len(uploaded_files)} file(s)!")
+            st.success(f"✅ Successfully updated the vector base with {len(uploaded_files)} file(s)!")
             # st.balloons()

@@ -4,7 +4,7 @@ def apply_responsive_config():
     """Configure page layout for responsiveness"""
     st.set_page_config(
         page_title="Vector Database Ingestion",
-        page_icon="📚",
+        page_icon="media/stufit_logo.png",
         layout="wide"
     )
 
