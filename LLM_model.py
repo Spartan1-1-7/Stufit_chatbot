@@ -19,7 +19,7 @@ token = os.getenv("HUGGINGFACE_mixtrail_read_TOKEN")
 faiss_index = faiss.read_index("db_faiss/faiss_index_chunk_text.faiss")  # your FAISS file
 with open("db_faiss/chunk_texts.pkl", "rb") as f:
     documents = pickle.load(f)  # your list of text chunks corresponding to vectors
-# print("FAISS index dimension:", faiss_index.d)
+print("FAISS index dimension:", faiss_index.d)
 
 
 # Load the embedding model (same one used during indexing)
