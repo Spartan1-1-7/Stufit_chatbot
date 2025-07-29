@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+nest_asyncio
+pydantic
+python-multipart
+PyPDF2
+sentence-transformers
+qdrant-client
+scikit-learn
