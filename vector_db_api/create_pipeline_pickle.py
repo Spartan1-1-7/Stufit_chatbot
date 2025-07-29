@@ -16,8 +16,10 @@ pipeline = Pipeline([
 ])
 
 pipeline.fit(fit_dir)
+from sklearn.utils.validation import check_is_fitted
+print(check_is_fitted(pipeline))
 
-with open('qdrant_vector_db_pipeline.pkl', 'wb') as f:
-    pickle.dump(pipeline, f)
+# with open('qdrant_vector_db_pipeline.pkl', 'wb') as f:
+#     pickle.dump(pipeline, f)
 
-print("Pipeline pickle created successfully.")
+# print("Pipeline pickle created successfully.")
