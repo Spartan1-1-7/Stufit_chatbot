@@ -135,14 +135,14 @@ class EmbeddingTransformer(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         # Load model once at fit time
-        self.model = SentenceTransformer(self.model_name)
+        self.model = SentenceTransformer(self.model_name, device='cpu')
         self.is_fitted_ = True
         return self
 
     def transform(self, X):
         # X is a list of cleaned strings (documents)
         if self.model is None:
-            self.model = SentenceTransformer(self.model_name)
+            self.model = SentenceTransformer(self.model_name, device='cpu')
         embeddings = self.model.encode(X, show_progress_bar=False)
         return np.array(embeddings)
 
