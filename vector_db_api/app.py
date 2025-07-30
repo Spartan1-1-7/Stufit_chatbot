@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 import os, shutil, pickle, sys
+import fitz
 
 # === Pipeline/dependency paths ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
