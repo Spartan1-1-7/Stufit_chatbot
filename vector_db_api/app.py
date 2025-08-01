@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 import os, shutil, pickle, sys
 import fitz
+import torch
 
 # === Pipeline/dependency paths ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,7 +17,7 @@ from my_pipeline_classes import PDFTextCleaner, EmbeddingTransformer, QdrantVect
 # === Load and fit the pipeline ===
 with open(PIPELINE_PATH, "rb") as f:
     pipeline = pickle.load(f)
-pipeline.fit(FIT_DIR)
+# pipeline.fit(FIT_DIR)
 
 app = FastAPI()
 

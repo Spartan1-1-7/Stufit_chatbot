@@ -9,7 +9,6 @@ from qdrant_client.http.models import Distance, VectorParams
 from qdrant_client.models import PointStruct
 import fitz
 
-# PDF text cleaner class
 class PDFTextCleaner(BaseEstimator, TransformerMixin):
     def __init__(self, remove_numbers=False, remove_special=True, lower=True,
                  remove_graphics=True, remove_headers_footers=True):
@@ -100,8 +99,6 @@ class PDFTextCleaner(BaseEstimator, TransformerMixin):
         print(f"[PDFTextCleaner] Number of cleaned documents: {len(cleaned_texts)}")
         return cleaned_texts
 
-
-# Text chunker class
 class TextChunker(BaseEstimator, TransformerMixin):
     def __init__(self, max_chunk_chars=2000, chunk_overlap=800):
         self.max_chunk_chars = max_chunk_chars
@@ -123,30 +120,37 @@ class TextChunker(BaseEstimator, TransformerMixin):
         print(f"[TextChunker] Number of chunks created: {len(all_chunks)}")
         return all_chunks
 
-
-# Embedding transformer class - returns (embeddings, chunk_texts)
 class EmbeddingTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, model_name='all-MiniLM-L6-v2'):
         self.model_name = model_name
-        self.model = None
 
     def fit(self, X, y=None):
-        self.model = SentenceTransformer(self.model_name, device='cpu')
-        self.is_fitted_ = True
+        # No persistent model; always create on transform
         return self
 
+    def _get_device(self):
+        import torch
+        return 'cuda' if torch.cuda.is_available() else 'cpu'
+
     def transform(self, X):
-        if self.model is None:
-            self.model = SentenceTransformer(self.model_name, device='cpu')
-        embeddings = self.model.encode(X, show_progress_bar=False)
+        import numpy as np
+        from sentence_transformers import SentenceTransformer
+        device = self._get_device()
+        model = SentenceTransformer(self.model_name, device=device)
+        print(f"[EmbeddingTransformer] Using device: {device.upper()}")
+        embeddings = model.encode(X, show_progress_bar=False)
+        embeddings = np.array(embeddings)
+        if np.isnan(embeddings).any() or np.isinf(embeddings).any():
+            print("Warning: Embeddings contain NaN or inf!")
         print(f"[EmbeddingTransformer] Number of embeddings created: {len(embeddings)}")
-        return (np.array(embeddings), X)  # Return embeddings and input chunk texts
+        return (embeddings, X)
 
-
-# Qdrant vector store manager - expects a tuple (embeddings, chunk_texts)
 class QdrantVectorStoreManager(BaseEstimator, TransformerMixin):
-    def __init__(self, path, collection_name, vector_size):
+    def __init__(self, path=None, host=None, port=None, collection_name=None, vector_size=384):
+        # Support both disk (path) and server (host/port) modes
         self.path = path
+        self.host = host
+        self.port = port
         self.collection_name = collection_name
         self.vector_size = vector_size
         self.client = None
@@ -154,7 +158,14 @@ class QdrantVectorStoreManager(BaseEstimator, TransformerMixin):
 
     def _connect(self):
         try:
-            self.client = QdrantClient(path=self.path)
+            if self.host and self.port:
+                self.client = QdrantClient(host=self.host, port=self.port)
+                print(f"Connected to Qdrant server at {self.host}:{self.port}")
+            elif self.path:
+                self.client = QdrantClient(path=self.path)
+                print(f"Connected to Qdrant local disk at {self.path}")
+            else:
+                raise RuntimeError("You must specify either host/port or path for Qdrant connection.")
             return True
         except Exception as e:
             self.status = f"Error connecting to Qdrant: {e}"
@@ -173,8 +184,9 @@ class QdrantVectorStoreManager(BaseEstimator, TransformerMixin):
         try:
             self.client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=VectorParams(size=self.vector_size, distance=Distance.COSINE),
+                vectors_config=VectorParams(size=self.vector_size, distance=Distance.COSINE)
             )
+            print("Qdrant collection created.")
             return True
         except Exception as e:
             self.status = f"Create collection error: {e}"
@@ -186,29 +198,54 @@ class QdrantVectorStoreManager(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X):
-        # X expected to be tuple: (embeddings, chunk_texts)
+        """
+        Expects X as a tuple: (embeddings, chunk_texts)
+        embeddings: numpy array (num_chunks, vector_size)
+        chunk_texts: list of strings (length: num_chunks)
+        """
         try:
             if self.client is None and not self._connect():
                 self.status = "Failed to connect to Qdrant store."
                 print(self.status)
                 return X
+
             if not self._collection_exists():
                 if not self._create_collection():
                     self.status = "Failed to create collection."
                     print(self.status)
                     return X
+
             embeddings, chunk_texts = X
-            points = [
-                PointStruct(
+
+            if len(embeddings) != len(chunk_texts):
+                raise ValueError(f"Embeddings and chunk_texts length mismatch: {len(embeddings)} vs {len(chunk_texts)}")
+
+            points = []
+            for idx, vector in enumerate(embeddings):
+                # Defensive: convert to numpy array, flatten and ensure float32
+                arr = np.asarray(vector, dtype=np.float32).flatten()
+                if arr.shape[0] != self.vector_size:
+                    print(f"Warning: Vector at idx {idx} has shape {arr.shape}, expected ({self.vector_size},), skipping. Chunk preview: {chunk_texts[idx][:80]}...")
+                    continue
+                if arr is None or not np.all(np.isfinite(arr)):
+                    print(f"Warning: Invalid vector at idx {idx} (None/NaN/inf found), skipping. Chunk preview: {chunk_texts[idx][:80]}...")
+                    continue
+                points.append(PointStruct(
                     id=int(idx),
-                    vector=vector.tolist(),
+                    vector=arr.tolist(),
                     payload={"chunk_text": chunk_texts[idx]}
-                )
-                for idx, vector in enumerate(embeddings)
-            ]
+                ))
+
+            if not points:
+                self.status = "No valid vectors to upsert."
+                print(self.status)
+                return X
+
+            print(f"Upserting {len(points)} points to Qdrant.")
             self.client.upsert(collection_name=self.collection_name, points=points)
             self.status = f"Qdrant vector store updated successfully: {len(points)} points upserted."
             print(self.status)
+
         except Exception as e:
             self.status = f"Failed to update Qdrant vector store: {e}"
             print(self.status)
@@ -221,4 +258,4 @@ class QdrantVectorStoreManager(BaseEstimator, TransformerMixin):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        # client will be None; will reconnect on next use
+        # client will be None; will reconnect as needed
