@@ -80,18 +80,34 @@ Stufit_chatbot/
 ├── 📄 vector_db_interface.py           # Vector database upload interface
 ├── 📄 stufit_chatbot_environment.yml   # Conda environment configuration
 ├── 📄 vectorized_medical_book_chunks.parquet  # Processed medical data
+├── 📄 finalvector.ipynb                # Data processing and analysis notebook
+├── 📄 ingest.ipynb                     # Document ingestion experiments
+├── 📄 test.yml                         # Test configuration
+├── 📄 README.md                        # Project documentation
 │
 ├── 📂 Books/                           # Medical literature and guidelines
 │   ├── adolescent-health.pdf
-│   ├── bipolar-disorder-assessment-and-management.pdf
-│   ├── Blood Results in Clinical Practice.pdf
+│   ├── bipolar-disorder-assessment-and-management-pdf-35109814379461_copy.pdf
+│   ├── Blood Results in Clinical Practice_ A practical guide to interpreting blood test results - Graham Basten (2019, M&K Update Ltd).pdf
+│   ├── constipation-in-children-and-young-people-diagnosis-and-management-pdf-975757753285_copy.pdf
+│   ├── fatty acid intake.pdf
+│   ├── guidelines-on-mental-health-promotive-and-preventive-interventions-for-adolescents-hat_copy.pdf
 │   ├── hypertension.pdf
-│   ├── obesity-clinical-assessment-and-management.pdf
+│   ├── IND301-20250415_copy.pdf
+│   ├── NICD guideline mental health.pdf
+│   ├── NICE 1.pdf
+│   ├── obesity-clinical-assessment-and-management-pdf-75545363615173_copy.pdf
+│   ├── obesity-in-adults-prevention-and-lifestyle-weight-management-programmes-pdf-75545293071301_copy.pdf
+│   ├── overweight-and-obesity-management-pdf-66143959958725_copy.pdf
+│   ├── physical-activity-exercise-referral-schemes-pdf-1996418406085_copy.pdf
+│   ├── ROUTINE BLOOD RESULTS EXPLAINED - ANDREW BLANN (2022, CAMBRIDGE SCHOLARS PUB) (1).pdf
 │   ├── WHO guideline for physics activity.pdf
+│   ├── B1.pdf
 │   └── new_books/                      # Extended medical reference collection
-│       ├── Cecil Essentials of Medicine.pdf
-│       ├── CURRENT Medical Diagnosis and Treatment 2021.pdf
-│       └── Harrisons Principles of Internal Medicine.pdf
+│       ├── Cecil Essentials of Medicine (Edward J. Wing MD  FACP  FIDSA (editor) etc.) (Z-Library).pdf
+│       ├── CURRENT Medical Diagnosis and Treatment 2021 Maxine A. Papadakis, Stephen J. McPhee, Michael W. Rabow, ( etc.) (Z-Library).pdf
+│       ├── Epidemiology (Leon Gordis) (Z-Library).pdf
+│       └── ... (additional medical textbooks)
 │
 ├── 📂 db_faiss/                        # FAISS vector database files
 │   ├── faiss_index_chunk_text.faiss
@@ -103,25 +119,33 @@ Stufit_chatbot/
 │   ├── 📄 my_pipeline_classes.py       # Custom ML pipeline components
 │   ├── 📄 create_pipeline_pickle.py    # Pipeline serialization
 │   ├── 📄 requirements.txt             # API dependencies
+│   ├── 📄 test.py                      # API testing utilities
 │   ├── 📄 qdrant_vector_db_pipeline.pkl # Serialized ML pipeline
+│   ├── 📂 __pycache__/                 # Python cache files
 │   ├── 📂 fit_data/                    # Training data for pipeline
 │   ├── 📂 ingestion_source/            # Temporary upload directory
-│   └── 📂 qdrant_db/                   # Qdrant vector database
+│   └── 📂 qdrant_db/                   # Qdrant vector database (download required)
 │
 ├── 📂 styles/                          # UI styling and themes
+│   ├── 📄 __init__.py
 │   ├── 📄 styling.py                   # Streamlit styling utilities
-│   └── 📄 styles.css                   # Custom CSS styles
+│   ├── 📄 styles.css                   # Custom CSS styles
+│   └── 📂 __pycache__/                 # Python cache files
 │
 ├── 📂 interface_assets/                # UI components and utilities
-│   └── 📄 responsive_styles.py         # Responsive design utilities
+│   ├── 📄 responsive_styles.py         # Responsive design utilities
+│   └── 📂 __pycache__/                 # Python cache files
 │
 ├── 📂 media/                           # Static assets
 │   ├── stufit_logo.png
 │   └── User_pfp.jpg
 │
-├── 📄 finalvector.ipynb                # Data processing and analysis notebook
-├── 📄 ingest.ipynb                     # Document ingestion experiments
-└── 📄 test.yml                         # Test configuration
+├── � .streamlit/                      # Streamlit configuration
+│   └── config.toml                     # UI theme configuration
+│
+└── � __pycache__/                     # Python cache files
+    ├── LLM_model.cpython-312.pyc
+    └── styling.cpython-312.pyc
 ```
 
 ## 🚀 Installation
@@ -141,6 +165,10 @@ cd Stufit_chatbot
 # Create and activate conda environment
 conda env create -f stufit_chatbot_environment.yml
 conda activate stufit_chatbot
+
+# Download and setup Qdrant database (Required for Vector DB API)
+# Download the database from: https://drive.google.com/file/d/1K8aX0lBSEQ6dMGFPpU3P2_X0A_0H7yYe/view?usp=sharing
+# Extract the downloaded file and copy all contents to vector_db_api/qdrant_db/ folder
 
 # Set up environment variables
 echo "HUGGINGFACE_mixtrail_read_TOKEN=your_huggingface_token" > .env
@@ -167,6 +195,10 @@ cd vector_db_api
 pip install -r requirements.txt
 cd ..
 
+# Download and setup Qdrant database (Required for Vector DB API)
+# Download the database from: https://drive.google.com/file/d/1K8aX0lBSEQ6dMGFPpU3P2_X0A_0H7yYe/view?usp=sharing
+# Extract the downloaded file and copy all contents to vector_db_api/qdrant_db/ folder
+
 # Set up environment variables
 echo "HUGGINGFACE_mixtrail_read_TOKEN=your_huggingface_token" > .env
 ```
@@ -175,6 +207,26 @@ echo "HUGGINGFACE_mixtrail_read_TOKEN=your_huggingface_token" > .env
 1. Create a free account at [HuggingFace](https://huggingface.co/)
 2. Generate an access token in your account settings
 3. Add the token to your `.env` file
+
+### Qdrant Database Setup (Required for Vector DB API)
+**Important**: To run the Vector Database API and pipeline, you must download the pre-built Qdrant database:
+
+1. **Download the database**: 
+   - Visit: https://drive.google.com/file/d/1K8aX0lBSEQ6dMGFPpU3P2_X0A_0H7yYe/view?usp=sharing
+   - Download the compressed file
+
+2. **Extract and setup**:
+   ```bash
+   # Extract the downloaded file
+   # Copy all extracted contents to the qdrant_db folder
+   cp -r /path/to/extracted/contents/* vector_db_api/qdrant_db/
+   ```
+
+3. **Verify setup**:
+   - Ensure the `vector_db_api/qdrant_db/` folder contains the database files
+   - The folder should not be empty after copying the contents
+
+**Note**: Without this database setup, the Vector DB API will not function properly.
 
 ## 💻 Usage
 
@@ -193,9 +245,16 @@ The application will be available at `http://localhost:8501`
 # Navigate to API directory
 cd vector_db_api
 
+# Ensure Qdrant database is properly set up (see installation section)
+# The qdrant_db folder should contain the downloaded database files
+
 # Start the FastAPI server
 uvicorn app:app --host 0.0.0.0 --port 10000
 ```
+
+**Prerequisites for API**:
+- Qdrant database must be downloaded and placed in `vector_db_api/qdrant_db/`
+- All dependencies from `requirements.txt` must be installed
 
 The API will be available at `http://localhost:10000`
 
@@ -291,6 +350,10 @@ cd Stufit_chatbot
 # Install in development mode
 conda env create -f stufit_chatbot_environment.yml
 conda activate stufit_chatbot
+
+# Download and setup Qdrant database (Required)
+# Download from: https://drive.google.com/file/d/1K8aX0lBSEQ6dMGFPpU3P2_X0A_0H7yYe/view?usp=sharing
+# Extract and copy contents to vector_db_api/qdrant_db/
 
 # Install additional development dependencies
 pip install jupyter ipywidgets
