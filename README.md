@@ -22,11 +22,12 @@ Stufit Report Analyzer is an intelligent chatbot designed to analyze medical rep
 
 **This is an internship project that demonstrates:**
 - Medical document processing and analysis
-- Vector database implementation for knowledge retrieval
+- Vector database implementation for knowledge retrieval (Qdrant)
 - Large Language Model (LLM) integration with PEFT fine-tuning
-- Parameter Efficient Fine-Tuning (PEFT) techniques for domain adaptation
+- Parameter Efficient Fine-Tuning (PEFT) techniques for medical domain adaptation
+- Model merging and optimization techniques
 - Interactive web interface development
-- RESTful API design
+- Comprehensive RAG (Retrieval-Augmented Generation) pipeline
 
 ## ✨ Features
 
@@ -38,12 +39,14 @@ Stufit Report Analyzer is an intelligent chatbot designed to analyze medical rep
 - **Document Upload**: Support for PDF medical documents
 
 ### Technical Features
-- **Vector Database**: FAISS and Qdrant integration for efficient similarity search
-- **Large Language Model**: Mixtral-8x7B fine-tuned using PEFT for medical domain
-- **PEFT Integration**: Parameter Efficient Fine-Tuning for specialized medical responses
+- **Vector Database**: Qdrant integration for efficient similarity search and document retrieval
+- **Large Language Model**: Llama-3-8B fine-tuned using PEFT for medical domain specialization
+- **PEFT Integration**: Parameter Efficient Fine-Tuning with LoRA adapters for specialized medical responses
+- **RAG Pipeline**: Complete Retrieval-Augmented Generation system combining vector search with LLM
+- **Model Optimization**: 4-bit quantization with BitsAndBytesConfig for efficient inference
 - **Document Processing**: Advanced PDF text extraction and cleaning
-- **Responsive UI**: Modern, mobile-friendly interface
-- **API Gateway**: RESTful API for document ingestion
+- **Responsive UI**: Modern, mobile-friendly Streamlit interface
+- **API Gateway**: RESTful API for document ingestion and vector database management
 
 ## 🏗️ Architecture
 
@@ -66,26 +69,43 @@ Stufit Report Analyzer is an intelligent chatbot designed to analyze medical rep
 ### Data Flow
 1. **Document Ingestion**: Medical PDFs are uploaded via the web interface
 2. **Text Processing**: Advanced cleaning and chunking of medical documents
-3. **Vector Embedding**: Documents converted to embeddings using SentenceTransformers
-4. **Storage**: Embeddings stored in vector databases (FAISS/Qdrant)
-5. **Query Processing**: User queries are embedded and matched against knowledge base
-6. **Response Generation**: Mixtral LLM generates contextual medical responses
+3. **Vector Embedding**: Documents converted to embeddings using SentenceTransformers (all-MiniLM-L6-v2)
+4. **Storage**: Embeddings stored in Qdrant vector database
+5. **Query Processing**: User queries are embedded and matched against knowledge base using cosine similarity
+6. **Retrieval**: Top-k relevant medical document chunks are retrieved
+7. **Response Generation**: Fine-tuned Llama-3-8B generates contextual medical responses using RAG pipeline
+8. **Model Optimization**: 4-bit quantization ensures efficient inference on consumer hardware
 
 ## 📁 Project Structure
 
 ```
 Stufit_chatbot/
-├── 📄 app.py                           # Main Streamlit application
-├── 📄 LLM_model.py                     # LLM integration and response generation
+├── 📄 app.py                           # Main Streamlit application (legacy)
 ├── 📄 vector_db_interface.py           # Vector database upload interface
 ├── 📄 stufit_chatbot_environment.yml   # Conda environment configuration
-├── 📄 vectorized_medical_book_chunks.parquet  # Processed medical data
-├── 📄 finalvector.ipynb                # Data processing and analysis notebook
-├── 📄 ingest.ipynb                     # Document ingestion experiments
 ├── 📄 test.yml                         # Test configuration
 ├── 📄 README.md                        # Project documentation
+├── 📄 .env                             # Environment variables (HuggingFace tokens)
+├── 📄 .gitignore                       # Git ignore file
 │
-├── 📂 Books/                           # Medical literature and guidelines
+├── 📂 rag_bot_files/                   # 🎯 Main RAG Bot Implementation
+│   ├── 📄 final_chatbot.ipynb          # 🚀 Complete RAG chatbot with fine-tuned Llama-3
+│   ├── 📄 LLM_model.py                 # Legacy LLM integration (Mixtral-based)
+│   └── 📄 rag_bot_unmerged_model.ipynb # RAG bot with unmerged adapter
+│
+├── � fine_tunning/                    # Model Fine-tuning Components
+│   ├── 📄 Stufit_LLM_Fine_tuning.ipynb        # Primary PEFT fine-tuning notebook
+│   └── 📄 OL_approach_Stufit_LLM_Fine_tuning.ipynb # Alternative fine-tuning approach
+│
+├── 📂 merging_model_with_adapter/      # Model Optimization
+│   └── 📄 merging-adapter-and-base-model.ipynb # LoRA adapter merging with base model
+│
+├── 📂 old_database/                    # Legacy Database Components
+│   ├── 📄 finalvector.ipynb            # Original vector database creation
+│   ├── 📄 ingest.ipynb                 # Document ingestion experiments
+│   └── 📄 vectorized_medical_book_chunks.parquet # Processed medical data (legacy)
+│
+├── 📂 Books/                           # Medical Literature Collection
 │   ├── adolescent-health.pdf
 │   ├── bipolar-disorder-assessment-and-management-pdf-35109814379461_copy.pdf
 │   ├── Blood Results in Clinical Practice_ A practical guide to interpreting blood test results - Graham Basten (2019, M&K Update Ltd).pdf
@@ -109,12 +129,12 @@ Stufit_chatbot/
 │       ├── Epidemiology (Leon Gordis) (Z-Library).pdf
 │       └── ... (additional medical textbooks)
 │
-├── 📂 db_faiss/                        # FAISS vector database files
+├── 📂 db_faiss/                        # Legacy FAISS Database (deprecated)
 │   ├── faiss_index_chunk_text.faiss
 │   ├── chunk_texts.pkl
 │   └── chunk_lengths.pkl
 │
-├── 📂 vector_db_api/                   # FastAPI backend service
+├── 📂 vector_db_api/                   # FastAPI Backend Service
 │   ├── 📄 app.py                       # FastAPI application
 │   ├── 📄 my_pipeline_classes.py       # Custom ML pipeline components
 │   ├── 📄 create_pipeline_pickle.py    # Pipeline serialization
@@ -124,55 +144,93 @@ Stufit_chatbot/
 │   ├── 📂 __pycache__/                 # Python cache files
 │   ├── 📂 fit_data/                    # Training data for pipeline
 │   ├── 📂 ingestion_source/            # Temporary upload directory
-│   └── 📂 qdrant_db/                   # Qdrant vector database (download required)
+│   └── 📂 qdrant_db/                   # 🔥 Qdrant vector database (download required)
 │
-├── 📂 styles/                          # UI styling and themes
+├── 📂 styles/                          # UI Styling and Themes
 │   ├── 📄 __init__.py
 │   ├── 📄 styling.py                   # Streamlit styling utilities
 │   ├── 📄 styles.css                   # Custom CSS styles
 │   └── 📂 __pycache__/                 # Python cache files
 │
-├── 📂 interface_assets/                # UI components and utilities
+├── 📂 interface_assets/                # UI Components and Utilities
 │   ├── 📄 responsive_styles.py         # Responsive design utilities
 │   └── 📂 __pycache__/                 # Python cache files
 │
-├── 📂 media/                           # Static assets
+├── 📂 media/                           # Static Assets
 │   ├── stufit_logo.png
 │   └── User_pfp.jpg
 │
-├── � .streamlit/                      # Streamlit configuration
+├── 📂 .streamlit/                      # Streamlit Configuration
 │   └── config.toml                     # UI theme configuration
 │
-└── � __pycache__/                     # Python cache files
+└── 📂 __pycache__/                     # Python Cache Files
     ├── LLM_model.cpython-312.pyc
     └── styling.cpython-312.pyc
 ```
 
-## 🚀 Installation
+```
 
-### Prerequisites
-- Python 3.12+
-- Conda (recommended) or pip
-- CUDA-compatible GPU (optional, for faster processing)
+## 🚀 Quick Start
 
-### Method 1: Using Conda (Recommended)
+### 1. Environment Setup
 
+#### Option A: Using Conda (Recommended)
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/Stufit_chatbot.git
-cd Stufit_chatbot
+git clone https://github.com/yourusername/stufit-chatbot.git
+cd stufit-chatbot
 
 # Create and activate conda environment
 conda env create -f stufit_chatbot_environment.yml
-conda activate stufit_chatbot
-
-# Download and setup Qdrant database (Required for Vector DB API)
-# Download the database from: https://drive.google.com/file/d/1K8aX0lBSEQ6dMGFPpU3P2_X0A_0H7yYe/view?usp=sharing
-# Extract the downloaded file and copy all contents to vector_db_api/qdrant_db/ folder
-
-# Set up environment variables
-echo "HUGGINGFACE_mixtrail_read_TOKEN=your_huggingface_token" > .env
+conda activate stufit_chatbot_env
 ```
+
+#### Option B: Using pip
+```bash
+# Install dependencies
+pip install streamlit torch transformers qdrant-client peft sentence-transformers
+pip install bitsandbytes accelerate datasets
+```
+
+### 2. Download Vector Database
+The Qdrant vector database must be downloaded separately due to size constraints:
+
+1. **Download the database**: [Qdrant Database (Google Drive)](https://drive.google.com/file/d/1r09W1jXBdEfQ0V9bfXyXz2CJfVsB8M9S/view?usp=sharing)
+2. **Extract** the downloaded file to `vector_db_api/qdrant_db/` directory
+3. **Verify** the path: `vector_db_api/qdrant_db/` should contain the Qdrant database files
+
+### 3. Configure HuggingFace Access
+Create a `.env` file in the root directory with your HuggingFace token:
+```bash
+HUGGINGFACE_TOKEN=your_huggingface_token_here
+```
+
+### 4. Run the Main Application
+
+#### 🎯 Primary Method: Final RAG Chatbot (Recommended)
+```bash
+# Navigate to the main implementation
+cd rag_bot_files
+jupyter notebook final_chatbot.ipynb
+```
+Run all cells in the notebook to start the complete RAG system with fine-tuned Llama-3-8B.
+
+#### Alternative: Streamlit Interface (Legacy)
+```bash
+streamlit run app.py
+```
+
+#### FastAPI Backend (Optional)
+```bash
+cd vector_db_api
+python app.py
+```
+
+### 5. Start Chatting!
+- For Jupyter notebook: Follow the cells to interact with the RAG system
+- For Streamlit: Open browser to `http://localhost:8501`
+- Upload medical reports or ask health-related questions
+- Get AI-powered insights based on fine-tuned medical knowledge
 
 ### Method 2: Using pip
 
@@ -311,11 +369,11 @@ with open('medical_report.pdf', 'rb') as f:
 ## 🛠️ Technologies Used
 
 ### Machine Learning & AI
-- **LLM**: Mixtral-8x7B-Instruct-v0.1 (Mistral AI) fine-tuned with PEFT
-- **Fine-tuning**: Parameter Efficient Fine-Tuning (PEFT) for medical domain adaptation
+- **LLM**: Meta Llama-3-8B with PEFT fine-tuning and 4-bit quantization
+- **Fine-tuning**: Parameter Efficient Fine-Tuning (PEFT) with LoRA adapters for medical domain adaptation
 - **Embeddings**: SentenceTransformers (all-MiniLM-L6-v2)
-- **Vector Databases**: FAISS, Qdrant
-- **ML Framework**: PyTorch, Transformers, scikit-learn, PEFT
+- **Vector Databases**: Qdrant (primary), FAISS (legacy)
+- **ML Framework**: PyTorch, Transformers, scikit-learn, PEFT, BitsAndBytesConfig
 
 ### Backend & APIs
 - **Web Framework**: FastAPI
@@ -359,13 +417,26 @@ conda activate stufit_chatbot
 pip install jupyter ipywidgets
 ```
 
+### Fine-tuning the Model
+
+```bash
+# Run PEFT fine-tuning notebook
+cd fine_tunning
+jupyter notebook Stufit_LLM_Fine_tuning.ipynb
+
+# Merge fine-tuned adapter with base model (optional)
+cd ../merging_model_with_adapter
+jupyter notebook merging-adapter-and-base-model.ipynb
+```
+
 ### Training the Vector Database
 
 ```bash
 # Process medical documents and create embeddings
 python vector_db_api/create_pipeline_pickle.py
 
-# Alternative: Use the Jupyter notebook
+# Alternative: Use the legacy Jupyter notebook in old_database/
+cd old_database
 jupyter lab finalvector.ipynb
 ```
 
@@ -378,13 +449,13 @@ jupyter lab finalvector.ipynb
 
 ### Customizing the Model
 
-Edit `LLM_model.py` to:
-- Change the LLM model
-- Modify PEFT configuration and adapters
-- Adjust fine-tuning parameters
-- Update prompt templates
-- Adjust retrieval parameters
-- Update embedding models
+The main implementation is in `rag_bot_files/final_chatbot.ipynb`. You can customize:
+- **LLM Configuration**: Change from Llama-3-8B to other models
+- **PEFT Settings**: Modify LoRA adapter parameters and quantization settings
+- **Fine-tuning Parameters**: Adjust training hyperparameters in `fine_tunning/` notebooks
+- **RAG Pipeline**: Update retrieval parameters and prompt templates
+- **Vector Database**: Switch between Qdrant and FAISS implementations
+- **Embedding Models**: Change SentenceTransformers model for embeddings
 
 ## 🤝 Contributing
 
